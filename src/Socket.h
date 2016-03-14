@@ -13,9 +13,11 @@ public:
 
     ~Socket();
 
+    void bindAddress(const InetAddress &localAddr);
+
     void listen();
 
-    void accept(InetAddress *peerAddr);
+    int accept(InetAddress *peerAddr);
 
     int fd() const
     { return socketfd_; }

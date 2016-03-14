@@ -1,6 +1,11 @@
 #include "EventLoop.h"
 #include "Channel.h"
 #include "Poller.h"
+#include "Acceptor.h"
+#include "InetAddress.h"
+#include "Socket.h"
+#include "TcpServer.h"
+#include "TcpConnection.h"
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -11,31 +16,28 @@
 using namespace libnet;
 using namespace std;
 
-EventLoop *gloop;
-
-void handler()
+void onConnection(const TcpConnection *conn)
 {
-    char buf[128];
-    while (read(STDIN_FILENO, buf, 128) >= 0)
-        ;
-    write(STDOUT_FILENO, buf, strlen(buf));
-    gloop->quit();
+    cout << "connection" << endl;
+}
+
+void onMessage(const TcpConnection *conn, const char *data, ssize_t len)
+{
+    cout << "message" << endl;
+    cout << data << endl;
 }
 
 int main()
 {
     EventLoop loop;
 
-    gloop = &loop;
+    InetAddress addr(8080);
 
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    flags |= O_NONBLOCK;
-    fcntl(STDIN_FILENO, F_SETFL, flags);
+    TcpServer server(&loop, addr);
+    server.setConnectionHandler(onConnection);
+    server.setMessageHandler(onMessage);
 
-    Channel channel(&loop, STDIN_FILENO);
-    channel.setReadHandler(handler);
-    channel.start();
-    channel.enableReading();
+    server.start();
 
     loop.loop();
 }

@@ -24,4 +24,9 @@ InetAddress::InetAddress(const std::string &ip, uint16_t port)
     addr_.sin_port = htons(port);
 }
 
+InetAddress::InetAddress(const struct sockaddr_in &addr) :
+    addr_(addr)
+{
+}
+
 }

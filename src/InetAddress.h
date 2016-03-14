@@ -15,6 +15,14 @@ public:
 
     InetAddress(const std::string &ip, uint16_t port);
 
+    explicit InetAddress(const struct sockaddr_in &addr);
+
+    const struct sockaddr_in* getSockAddr() const
+    { return &addr_; }
+
+    void setSockAddr(const struct sockaddr_in &addr)
+    { addr_ = addr; }
+
 private:
     struct sockaddr_in addr_;
 };

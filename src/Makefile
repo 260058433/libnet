@@ -7,7 +7,12 @@ OBJS = main.o \
 	   ./EventLoop.o \
 	   ./Channel.o \
 	   ./Poller.o \
-	   ./EpollPoller.o
+	   ./EpollPoller.o \
+	   ./Socket.o \
+	   ./InetAddress.o \
+	   ./Acceptor.o \
+	   ./TcpServer.o \
+	   ./TcpConnection.o
 
 .PHONY: all
 all: $(EXEC)

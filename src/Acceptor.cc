@@ -1,11 +1,14 @@
 #include "Acceptor.h"
 #include "Socket.h"
+#include "Channel.h"
+#include "InetAddress.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <fcntl.h>
+#include <unistd.h>
 
 namespace libnet
 {
@@ -15,6 +18,13 @@ Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reusePor
     acceptSocket_(createNonblockSocket()),
     acceptChannel_(loop, acceptSocket_.fd()),
     newConnectionHandler_(nullptr)
+{
+    acceptSocket_.setReusePort(reusePort);
+    acceptSocket_.bindAddress(listenAddr);
+    acceptChannel_.setReadHandler(std::bind(&Acceptor::handlerRead, this));
+}
+
+Acceptor::~Acceptor()
 {
 }
 
@@ -33,6 +43,26 @@ int Acceptor::createNonblockSocket()
         throw std::runtime_error("fcntl");
 
     return socketfd;
+}
+
+void Acceptor::listen()
+{
+    acceptChannel_.start();
+    acceptChannel_.enableReading();
+    acceptSocket_.listen();
+}
+
+void Acceptor::handlerRead()
+{
+    InetAddress peerAddr;
+    int connfd = acceptSocket_.accept(&peerAddr);
+    if (connfd >= 0)
+    {
+        if (newConnectionHandler_)
+            newConnectionHandler_(connfd, peerAddr);
+        else
+            ::close(connfd);
+    }
 }
 
 }

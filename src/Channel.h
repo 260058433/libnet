@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <sys/epoll.h>
+#include <functional>
 
 namespace libnet
 {
@@ -11,7 +12,7 @@ class EventLoop;
 
 class Channel {
 public:
-    typedef void (*EventHandler)(void);
+    typedef std::function<void(void)> EventHandler;
 
     Channel(EventLoop *loop, int fd);
     ~Channel();
